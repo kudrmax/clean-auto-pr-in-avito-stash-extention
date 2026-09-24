@@ -8,13 +8,14 @@ class AutoPrSection {
     this.dashboard = dashboard;
   }
 
-  render(autoPrRows) {
+  render(originalRows, sectionRows) {
     this.remove();
-    if (autoPrRows.length === 0) {
-      return;
+    if (originalRows.length > 0) {
+      this.hideOriginals(originalRows);
     }
-    this.hideOriginals(autoPrRows);
-    this.insertSection(autoPrRows);
+    if (sectionRows.length > 0) {
+      this.insertSection(sectionRows);
+    }
   }
 
   remove() {
@@ -22,8 +23,8 @@ class AutoPrSection {
     this.document.getElementById(AutoPrSection.STYLE_ID)?.remove();
   }
 
-  hideOriginals(autoPrRows) {
-    const rowSelectors = autoPrRows.map((row) =>
+  hideOriginals(originalRows) {
+    const rowSelectors = originalRows.map((row) =>
       `${ReviewDashboard.REVIEW_SECTION} ${ReviewDashboard.ROW}:has(${ReviewDashboard.TITLE_LINK}[href="${AutoPrSection.escape(ReviewDashboard.rowUrl(row))}"])`
     );
     const style = this.document.createElement('style');
@@ -32,13 +33,13 @@ class AutoPrSection {
     this.document.head.appendChild(style);
   }
 
-  insertSection(autoPrRows) {
+  insertSection(sectionRows) {
     const section = this.document.createElement('div');
     section.className = `dashboard-pull-request-table main-section ${AutoPrSection.SECTION_CLASS}`;
     section.dataset.autopr = 'section';
 
     const heading = this.document.createElement('h3');
-    heading.textContent = `${AutoPrSection.TITLE} (${autoPrRows.length})`;
+    heading.textContent = `${AutoPrSection.TITLE} (${sectionRows.length})`;
 
     const table = this.document.createElement('table');
     const head = this.dashboard.reviewTableHead();
@@ -46,7 +47,7 @@ class AutoPrSection {
       table.appendChild(head.cloneNode(true));
     }
     const body = this.document.createElement('tbody');
-    autoPrRows.forEach((row) => body.appendChild(row.cloneNode(true)));
+    body.append(...sectionRows);
     table.appendChild(body);
 
     section.append(heading, table);

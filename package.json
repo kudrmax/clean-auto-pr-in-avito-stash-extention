@@ -1,5 +1,5 @@
 {
-  "name": "stash-autopr-section",
+  "name": "clean-auto-pr-in-avito-stash-extention",
   "private": true,
   "scripts": {
     "test": "node --test test/*.test.js"

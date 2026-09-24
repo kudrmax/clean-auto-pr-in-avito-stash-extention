@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Stash AutoPR Section",
-  "version": "1.0.0",
+  "name": "Clean AutoPR in Avito Stash",
+  "version": "1.1.0",
   "description": "Moves AutoPR pull requests from \"Pull requests to review\" into a separate section on the Stash dashboard.",
   "permissions": ["storage"],
   "content_scripts": [
@@ -11,6 +11,8 @@
         "src/AutoPrSettings.js",
         "src/AutoPrMatcher.js",
         "src/ReviewDashboard.js",
+        "src/StashPullRequestApi.js",
+        "src/PullRequestRowRenderer.js",
         "src/AutoPrSection.js",
         "src/AutoPrController.js",
         "src/content.js"

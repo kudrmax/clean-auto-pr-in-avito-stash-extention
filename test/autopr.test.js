@@ -5,7 +5,7 @@ const path = require('node:path');
 const { JSDOM } = require('jsdom');
 const { dashboardHtml, row, REVIEW_ROWS } = require('./fixture');
 
-const SOURCES = ['AutoPrSettings', 'AutoPrMatcher', 'ReviewDashboard', 'AutoPrSection', 'AutoPrController']
+const SOURCES = ['AutoPrSettings', 'AutoPrMatcher', 'ReviewDashboard', 'StashPullRequestApi', 'PullRequestRowRenderer', 'AutoPrSection', 'AutoPrController']
   .map((name) => fs.readFileSync(path.join(__dirname, '..', 'src', `${name}.js`), 'utf8'));
 
 function setup(html = dashboardHtml()) {
@@ -37,7 +37,7 @@ test('matcher: invalid pattern is rejected', () => {
   assert.equal(window.AutoPrMatcher.isValidPattern('^foo'), true);
 });
 
-test('section is inserted after "Your pull requests" with AutoPR rows and count', () => {
+test('without API: section is inserted after "Your pull requests" with AutoPR rows and count', () => {
   const { document, controller } = setup();
   controller.start();
 
