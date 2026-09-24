@@ -12,16 +12,18 @@ class StashPullRequestApi {
     let start = 0;
     for (let page = 0; page < StashPullRequestApi.MAX_PAGES; page++) {
       const body = await this.getJson(
-        `/rest/api/latest/dashboard/pull-requests?state=OPEN&role=REVIEWER` +
+        `/rest/ui/latest/dashboard/pull-requests?state=OPEN&role=REVIEWER&order=participant_status&order=draft_status` +
         `&avatarSize=${StashPullRequestApi.AVATAR_SIZE}&limit=${StashPullRequestApi.PAGE_LIMIT}&start=${start}`
       );
-      pullRequests.push(...(body.values ?? []).map(StashPullRequestApi.toModel));
+      pullRequests.push(...(body.values ?? []).map((item) =>
+        StashPullRequestApi.toModel(item.pullRequest ?? item, item.buildSummaries)
+      ));
       if (body.isLastPage !== false || body.nextPageStart == null) {
         break;
       }
       start = body.nextPageStart;
     }
-    await Promise.all(pullRequests.map((pr) => this.attachBuilds(pr)));
+    await Promise.all(pullRequests.filter((pr) => pr.builds === undefined).map((pr) => this.attachBuilds(pr)));
     return pullRequests;
   }
 
@@ -31,11 +33,7 @@ class StashPullRequestApi {
     }
     try {
       const stats = await this.getJson(`/rest/build-status/latest/commits/stats/${encodeURIComponent(pr.latestCommit)}`);
-      pr.builds = {
-        successful: stats.successful ?? 0,
-        failed: stats.failed ?? 0,
-        inProgress: stats.inProgress ?? 0,
-      };
+      pr.builds = StashPullRequestApi.toBuilds(stats);
     } catch {
       pr.builds = null;
     }
@@ -49,7 +47,7 @@ class StashPullRequestApi {
     return response.json();
   }
 
-  static toModel(json) {
+  static toModel(json, buildSummaries) {
     const repository = json.toRef?.repository ?? {};
     const projectKey = repository.project?.key ?? '';
     const repoSlug = repository.slug ?? '';
@@ -60,6 +58,7 @@ class StashPullRequestApi {
       author: StashPullRequestApi.toUser(json.author?.user),
       projectKey,
       projectUrl: `/projects/${encodeURIComponent(projectKey)}`,
+      repoSlug,
       repoName: repository.name ?? repoSlug,
       repoUrl: `/projects/${encodeURIComponent(projectKey)}/repos/${encodeURIComponent(repoSlug)}/browse`,
       branch: json.toRef?.displayId ?? '',
@@ -68,14 +67,29 @@ class StashPullRequestApi {
       reviewers: (json.reviewers ?? []).map((reviewer) => ({
         ...StashPullRequestApi.toUser(reviewer.user),
         status: reviewer.status ?? (reviewer.approved ? 'APPROVED' : 'UNAPPROVED'),
+        lastReviewedCommit: reviewer.lastReviewedCommit ?? null,
       })),
       latestCommit: json.fromRef?.latestCommit ?? null,
-      builds: null,
+      builds: buildSummaries === undefined ? undefined : StashPullRequestApi.toBuilds(buildSummaries),
+    };
+  }
+
+  static toBuilds(summary) {
+    if (!summary) {
+      return null;
+    }
+    return {
+      successful: summary.successful ?? 0,
+      failed: summary.failed ?? 0,
+      inProgress: summary.inProgress ?? 0,
+      cancelled: summary.cancelled ?? 0,
+      unknown: summary.unknown ?? 0,
     };
   }
 
   static toUser(user) {
     return {
+      username: user?.name ?? user?.slug ?? '',
       name: user?.displayName ?? user?.name ?? '',
       avatarUrl: user?.avatarUrl ?? '',
     };

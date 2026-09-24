@@ -5,7 +5,7 @@ const path = require('node:path');
 const { JSDOM } = require('jsdom');
 const { dashboardHtml, row, REVIEW_ROWS } = require('./fixture');
 
-const SOURCES = ['AutoPrSettings', 'AutoPrMatcher', 'ReviewDashboard', 'StashPullRequestApi', 'PullRequestRowRenderer', 'AutoPrSection', 'AutoPrController']
+const SOURCES = ['AutoPrSettings', 'AutoPrMatcher', 'ReviewDashboard', 'StashPullRequestApi', 'PullRequestRowRenderer', 'StashRowFactory', 'AutoPrSection', 'AutoPrController']
   .map((name) => fs.readFileSync(path.join(__dirname, '..', 'src', `${name}.js`), 'utf8'));
 
 function setup(html = dashboardHtml()) {
@@ -37,14 +37,14 @@ test('matcher: invalid pattern is rejected', () => {
   assert.equal(window.AutoPrMatcher.isValidPattern('^foo'), true);
 });
 
-test('without API: section is inserted after "Your pull requests" with AutoPR rows and count', () => {
+test('without API: section is inserted between review and "Your pull requests" with AutoPR rows and count', () => {
   const { document, controller } = setup();
   controller.start();
 
   const section = document.querySelector('[data-autopr="section"]');
   assert.ok(section);
-  assert.equal(section.previousElementSibling.classList.contains('created-pull-requests'), true);
-  assert.equal(section.nextElementSibling.classList.contains('closed-pull-requests'), true);
+  assert.equal(section.previousElementSibling.classList.contains('reviewing-pull-requests'), true);
+  assert.equal(section.nextElementSibling.classList.contains('created-pull-requests'), true);
   assert.equal(section.querySelector('h3').textContent, 'Pull requests to review (AutoPRs) (2)');
   assert.deepEqual(titles(section.querySelectorAll('tbody tr')), [
     '[AutoPR] AUTOPR-193 Update observability to v2.36.0',

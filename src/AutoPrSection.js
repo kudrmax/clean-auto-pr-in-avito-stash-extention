@@ -1,5 +1,6 @@
 class AutoPrSection {
   static TITLE = 'Pull requests to review (AutoPRs)';
+  static LOADING_TEXT = 'Loading AutoPRs…';
   static SECTION_CLASS = 'autopr-pull-requests';
   static STYLE_ID = 'autopr-section-style';
 
@@ -14,8 +15,20 @@ class AutoPrSection {
       this.hideOriginals(originalRows);
     }
     if (sectionRows.length > 0) {
-      this.insertSection(sectionRows);
+      this.insertSection(`${AutoPrSection.TITLE} (${sectionRows.length})`, this.table(sectionRows));
     }
+  }
+
+  renderLoading(originalRows) {
+    this.remove();
+    if (originalRows.length > 0) {
+      this.hideOriginals(originalRows);
+    }
+    const placeholder = this.document.createElement('p');
+    placeholder.className = 'autopr-loading';
+    placeholder.textContent = AutoPrSection.LOADING_TEXT;
+    placeholder.style.color = 'var(--ds-text-subtlest, #626f86)';
+    this.insertSection(AutoPrSection.TITLE, placeholder);
   }
 
   remove() {
@@ -33,14 +46,18 @@ class AutoPrSection {
     this.document.head.appendChild(style);
   }
 
-  insertSection(sectionRows) {
+  insertSection(title, content) {
     const section = this.document.createElement('div');
     section.className = `dashboard-pull-request-table main-section ${AutoPrSection.SECTION_CLASS}`;
     section.dataset.autopr = 'section';
 
     const heading = this.document.createElement('h3');
-    heading.textContent = `${AutoPrSection.TITLE} (${sectionRows.length})`;
+    heading.textContent = title;
+    section.append(heading, content);
+    this.dashboard.reviewSection().after(section);
+  }
 
+  table(sectionRows) {
     const table = this.document.createElement('table');
     const head = this.dashboard.reviewTableHead();
     if (head) {
@@ -49,10 +66,7 @@ class AutoPrSection {
     const body = this.document.createElement('tbody');
     body.append(...sectionRows);
     table.appendChild(body);
-
-    section.append(heading, table);
-    const anchor = this.dashboard.createdSection() ?? this.dashboard.reviewSection();
-    anchor.after(section);
+    return table;
   }
 
   static escape(value) {

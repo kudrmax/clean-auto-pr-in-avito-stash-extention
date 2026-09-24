@@ -110,8 +110,7 @@ class PullRequestRowRenderer {
       return null;
     }
     const { successful, failed, inProgress } = pr.builds;
-    const total = successful + failed + inProgress;
-    if (total === 0) {
+    if (successful + failed + inProgress === 0) {
       return null;
     }
     const [modifier, symbol] = failed > 0 ? ['failed', '✕'] : inProgress > 0 ? ['in-progress', '●'] : ['successful', '✓'];
