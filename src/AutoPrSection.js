@@ -1,12 +1,15 @@
 class AutoPrSection {
   static TITLE = 'Pull requests to review (AutoPRs)';
   static LOADING_TEXT = 'Loading AutoPRs…';
+  static SHOW_MORE_TEXT = 'Show more pull requests';
+  static COLLAPSED_ROWS = 4;
   static SECTION_CLASS = 'autopr-pull-requests';
   static STYLE_ID = 'autopr-section-style';
 
   constructor(document, dashboard) {
     this.document = document;
     this.dashboard = dashboard;
+    this.expanded = false;
   }
 
   render(originalRows, sectionRows) {
@@ -15,7 +18,12 @@ class AutoPrSection {
       this.hideOriginals(originalRows);
     }
     if (sectionRows.length > 0) {
-      this.insertSection(`${AutoPrSection.TITLE} (${sectionRows.length})`, this.table(sectionRows));
+      const content = [this.table(sectionRows)];
+      if (!this.expanded && sectionRows.length > AutoPrSection.COLLAPSED_ROWS) {
+        sectionRows.slice(AutoPrSection.COLLAPSED_ROWS).forEach((row) => { row.style.display = 'none'; });
+        content.push(this.showMoreButton(sectionRows));
+      }
+      this.insertSection(`${AutoPrSection.TITLE} (${sectionRows.length})`, ...content);
     }
   }
 
@@ -46,14 +54,30 @@ class AutoPrSection {
     this.document.head.appendChild(style);
   }
 
-  insertSection(title, content) {
+  showMoreButton(sectionRows) {
+    const prototype = this.document.querySelector('.dashboard-pull-request-table:not([data-autopr]) button.show-more');
+    const button = prototype ? prototype.cloneNode(true) : this.document.createElement('button');
+    if (!prototype) {
+      button.type = 'button';
+      button.className = 'show-more';
+      button.textContent = AutoPrSection.SHOW_MORE_TEXT;
+    }
+    button.addEventListener('click', () => {
+      this.expanded = true;
+      sectionRows.forEach((row) => { row.style.display = ''; });
+      button.remove();
+    });
+    return button;
+  }
+
+  insertSection(title, ...content) {
     const section = this.document.createElement('div');
     section.className = `dashboard-pull-request-table main-section ${AutoPrSection.SECTION_CLASS}`;
     section.dataset.autopr = 'section';
 
     const heading = this.document.createElement('h3');
     heading.textContent = title;
-    section.append(heading, content);
+    section.append(heading, ...content);
     this.dashboard.reviewSection().after(section);
   }
 

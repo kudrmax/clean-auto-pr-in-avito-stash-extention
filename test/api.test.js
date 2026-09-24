@@ -226,6 +226,46 @@ test('no "New commits" icon when current user reviewed the latest commit', async
   controller.stop();
 });
 
+test('more than 4 AutoPRs: first 4 shown, rest behind native "Show more", stays expanded after re-render', async () => {
+  const { window, document } = setup();
+  document.querySelector('.created-pull-requests').insertAdjacentHTML('beforeend',
+    '<button class="show-more css-1pifu9q" type="button"><span class="css-bwxjrz"><svg></svg></span><span class="css-178ag6o">Show more pull requests</span></button>');
+  const prs = [1, 2, 3, 4, 5, 6].map((id) => apiPr(id, 'r', `[AutoPR] number ${id}`));
+  const api = new window.StashPullRequestApi(async (url) => ({
+    ok: true,
+    json: async () => (url.includes('dashboard') ? { values: prs.map(wrap), isLastPage: true } : {}),
+  }));
+  const controller = new window.AutoPrController(window, window.AutoPrSettings.DEFAULT_PATTERN, api);
+  controller.start();
+  await tick();
+
+  const visibleTitles = () => sectionRows(document).filter((r) => r.style.display !== 'none').map((r) => r.querySelector('.title a').textContent);
+  assert.equal(document.querySelector('[data-autopr="section"] h3').textContent, 'Pull requests to review (AutoPRs) (6)');
+  assert.deepEqual(visibleTitles(), ['[AutoPR] number 1', '[AutoPR] number 2', '[AutoPR] number 3', '[AutoPR] number 4']);
+  const button = document.querySelector('[data-autopr="section"] > button.show-more');
+  assert.equal(button.className, 'show-more css-1pifu9q');
+  assert.equal(button.textContent, 'Show more pull requests');
+
+  button.click();
+  assert.equal(visibleTitles().length, 6);
+  assert.equal(document.querySelector('[data-autopr="section"] button.show-more'), null);
+
+  controller.setPattern('\\[AutoPR\\]');
+  assert.equal(visibleTitles().length, 6);
+  assert.equal(document.querySelector('[data-autopr="section"] button.show-more'), null);
+  controller.stop();
+});
+
+test('4 or fewer AutoPRs: no "Show more"', async () => {
+  const { document, controller } = setup();
+  controller.start();
+  await tick();
+
+  assert.equal(document.querySelector('[data-autopr="section"] button.show-more'), null);
+  assert.equal(sectionRows(document).filter((r) => r.style.display === 'none').length, 0);
+  controller.stop();
+});
+
 test('titles from API are inserted as text, not HTML', async () => {
   const { window, document } = setup();
   const api = new window.StashPullRequestApi(async (url) => ({
