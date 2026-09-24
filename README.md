@@ -2,6 +2,10 @@
 
 Убирает AutoPR из «Pull requests to review» в Stash и показывает их отдельной секцией.
 
+| Без расширения | С расширением |
+|---|---|
+| ![](docs/before.webp) | ![](docs/after.webp) |
+
 ## Установка
 
 1. `chrome://extensions` → включить **Developer mode**.
