@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Stash AutoPR Section",
+  "version": "1.0.0",
+  "description": "Moves AutoPR pull requests from \"Pull requests to review\" into a separate section on the Stash dashboard.",
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["https://stash.msk.avito.ru/*"],
+      "js": [
+        "src/AutoPrSettings.js",
+        "src/AutoPrMatcher.js",
+        "src/ReviewDashboard.js",
+        "src/AutoPrSection.js",
+        "src/AutoPrController.js",
+        "src/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": false
+  }
+}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Stash AutoPR Section</title>
+  <style>
+    body { font: 14px -apple-system, sans-serif; padding: 16px; min-width: 420px; }
+    input { width: 100%; box-sizing: border-box; font-family: monospace; padding: 6px; }
+    .status { margin-top: 8px; min-height: 1em; }
+    .error { color: #c9372c; }
+    .ok { color: #22a06b; }
+  </style>
+</head>
+<body>
+  <label for="pattern">Regex заголовка AutoPR (без учёта регистра)</label>
+  <input id="pattern" type="text" spellcheck="false">
+  <p>
+    <button id="save">Сохранить</button>
+    <button id="reset">По умолчанию</button>
+  </p>
+  <div id="status" class="status"></div>
+  <script src="../src/AutoPrSettings.js"></script>
+  <script src="../src/AutoPrMatcher.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
