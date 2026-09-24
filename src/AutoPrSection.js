@@ -8,13 +8,12 @@ class AutoPrSection {
     this.dashboard = dashboard;
   }
 
-  render(autoPrRows, totalRows) {
+  render(autoPrRows) {
     this.remove();
     if (autoPrRows.length === 0) {
       return;
     }
     this.hideOriginals(autoPrRows);
-    this.insertReviewHeading(totalRows - autoPrRows.length);
     this.insertSection(autoPrRows);
   }
 
@@ -27,22 +26,10 @@ class AutoPrSection {
     const rowSelectors = autoPrRows.map((row) =>
       `${ReviewDashboard.REVIEW_SECTION} ${ReviewDashboard.ROW}:has(${ReviewDashboard.TITLE_LINK}[href="${AutoPrSection.escape(ReviewDashboard.rowUrl(row))}"])`
     );
-    const headingSelector = `${ReviewDashboard.REVIEW_SECTION} > h3:not([data-autopr])`;
     const style = this.document.createElement('style');
     style.id = AutoPrSection.STYLE_ID;
-    style.textContent = `${[...rowSelectors, headingSelector].join(',\n')} { display: none !important; }`;
+    style.textContent = `${rowSelectors.join(',\n')} { display: none !important; }`;
     this.document.head.appendChild(style);
-  }
-
-  insertReviewHeading(remaining) {
-    const original = this.dashboard.reviewHeading();
-    if (!original) {
-      return;
-    }
-    const heading = this.document.createElement('h3');
-    heading.dataset.autopr = 'review-heading';
-    heading.textContent = original.textContent.replace(/\(\d+\)\s*$/, `(${remaining})`);
-    original.after(heading);
   }
 
   insertSection(autoPrRows) {

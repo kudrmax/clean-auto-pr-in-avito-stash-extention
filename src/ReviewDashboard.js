@@ -29,10 +29,6 @@ class ReviewDashboard {
     return this.reviewSection()?.querySelector('thead') ?? null;
   }
 
-  reviewHeading() {
-    return this.reviewSection()?.querySelector(':scope > h3:not([data-autopr])') ?? null;
-  }
-
   static rowUrl(row) {
     return row.querySelector(ReviewDashboard.TITLE_LINK)?.getAttribute('href') ?? '';
   }

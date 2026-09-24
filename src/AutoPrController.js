@@ -40,7 +40,7 @@ class AutoPrController {
       return;
     }
     this.signature = signature;
-    this.section.render(autoPrRows, rows.length);
+    this.section.render(autoPrRows);
   }
 
   signatureOf(rows, autoPrRows) {
@@ -48,7 +48,6 @@ class AutoPrController {
       rows.map((row) => row.outerHTML),
       autoPrRows.map(ReviewDashboard.rowUrl),
       Boolean(this.dashboard.createdSection()),
-      this.dashboard.reviewHeading()?.textContent,
     ]);
   }
 

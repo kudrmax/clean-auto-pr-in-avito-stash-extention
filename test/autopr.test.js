@@ -67,13 +67,13 @@ test('originals are hidden, not moved; same PR id in other repo stays visible', 
   controller.stop();
 });
 
-test('review heading count is reduced by AutoPR count', () => {
+test('review heading is left untouched', () => {
   const { document, controller } = setup();
   controller.start();
 
   const headings = [...document.querySelectorAll('.reviewing-pull-requests > h3')]
     .filter((h) => document.defaultView.getComputedStyle(h).display !== 'none');
-  assert.deepEqual(headings.map((h) => h.textContent), ['Pull requests to review (3)']);
+  assert.deepEqual(headings.map((h) => h.textContent), [`Pull requests to review (${REVIEW_ROWS.length})`]);
   controller.stop();
 });
 
