@@ -78,7 +78,7 @@ class AutoPrSection {
     const heading = this.document.createElement('h3');
     heading.textContent = title;
     section.append(heading, ...content);
-    this.dashboard.reviewSection().after(section);
+    (this.dashboard.createdSection() ?? this.dashboard.reviewSection()).after(section);
   }
 
   table(sectionRows) {

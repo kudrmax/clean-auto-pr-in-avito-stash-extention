@@ -145,14 +145,14 @@ test('shows loading placeholder until API responds, then all AutoPRs at once', a
   controller.stop();
 });
 
-test('section keeps API order and sits between review and "Your pull requests"', async () => {
+test('section keeps API order and sits below "Your pull requests"', async () => {
   const { document, controller } = setup();
   controller.start();
   await tick();
 
   const section = document.querySelector('[data-autopr="section"]');
-  assert.ok(section.previousElementSibling.classList.contains('reviewing-pull-requests'));
-  assert.ok(section.nextElementSibling.classList.contains('created-pull-requests'));
+  assert.ok(section.previousElementSibling.classList.contains('created-pull-requests'));
+  assert.ok(section.nextElementSibling.classList.contains('closed-pull-requests'));
   assert.deepEqual(sectionTitles(document), [
     '[AutoPR] AUTOPR-193 Update observability to v2.36.0',
     '[AutoPR] AUTOPR-193 Update platform',
